@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+dist/
+build/
+*.whl
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Generated at runtime by the notebook
+labs/*/params.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+*.swp
+*.swo
+*~
+
+# Azure
+.azure/
+
+# Environment variables
+.env
+.env.local
