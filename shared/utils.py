@@ -64,7 +64,7 @@ def create_resource_group(resource_group_name, resource_group_location=None):
             else:
                 print_info(f"Resource group {resource_group_name} does not yet exist. Creating the resource group now...")
 
-                output = run(f"az group create --name {resource_group_name} --location {resource_group_location} --tags source=apim-mcp",
+                output = run(f"az group create --name {resource_group_name} --location {resource_group_location} --tags source=api-modernization-with-mcp",
                     f"Resource group '{resource_group_name}' created",
                     f"Failed to create the resource group '{resource_group_name}'")
 

@@ -25,7 +25,7 @@ The **Model Context Protocol** is an open standard that turns APIs into **tools*
 ## Repository Structure
 
 ```
-apim-mcp/
+api-modernization-with-mcp/
 ├── labs/
 │   └── expose-rest-api-as-mcp/      # Lab notebook, Bicep templates, and README
 │       ├── expose-rest-api-as-mcp.ipynb
@@ -53,8 +53,8 @@ apim-mcp/
 
 ```bash
 # Clone the repository
-git clone <repo-url>
-cd apim-mcp
+git clone https://github.com/odaibert/api-modernization-with-mcp.git
+cd api-modernization-with-mcp
 
 # Open in VS Code
 code .
