@@ -1,0 +1,86 @@
+/* ── Hero section styling ── */
+.md-typeset .hero-title {
+  font-size: 2.4rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 0.5rem;
+}
+
+.md-typeset .hero-subtitle {
+  font-size: 1.2rem;
+  color: var(--md-default-fg-color--light);
+  margin-bottom: 1.5rem;
+}
+
+/* ── Grid cards enhancements ── */
+.md-typeset .grid.cards > ul > li {
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 0.4rem;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.md-typeset .grid.cards > ul > li:hover {
+  border-color: var(--md-primary-fg-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* ── Admonition tweaks ── */
+.md-typeset .admonition,
+.md-typeset details {
+  border-radius: 0.4rem;
+}
+
+/* ── Table styling ── */
+.md-typeset table:not([class]) {
+  border-radius: 0.4rem;
+  overflow: hidden;
+}
+
+.md-typeset table:not([class]) th {
+  background-color: var(--md-primary-fg-color);
+  color: var(--md-primary-bg-color);
+  font-weight: 600;
+}
+
+[data-md-color-scheme="slate"] .md-typeset table:not([class]) th {
+  background-color: var(--md-primary-fg-color--dark);
+}
+
+/* ── Code block improvements ── */
+.md-typeset pre > code {
+  font-size: 0.82rem;
+}
+
+/* ── ASCII diagram readability ── */
+.md-typeset pre > code {
+  line-height: 1.45;
+}
+
+/* ── Footer tweaks ── */
+.md-footer-meta {
+  background-color: var(--md-primary-fg-color--dark);
+}
+
+/* ── Smooth scroll ── */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ── Status badges in tables ── */
+.md-typeset .status-badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.md-typeset .status-badge--check {
+  background-color: #4caf50;
+  color: white;
+}
+
+.md-typeset .status-badge--dash {
+  background-color: #9e9e9e;
+  color: white;
+}

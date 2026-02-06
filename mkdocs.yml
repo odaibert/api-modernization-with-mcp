@@ -1,0 +1,95 @@
+site_name: API Modernization with MCP
+site_url: https://odaibert.github.io/api-modernization-with-mcp
+site_description: Modernize your APIs for the AI Agent Era — Expose REST APIs as MCP servers through Azure API Management
+site_author: Osvaldo Daibert
+repo_name: odaibert/api-modernization-with-mcp
+repo_url: https://github.com/odaibert/api-modernization-with-mcp
+edit_uri: edit/odaibert/v1.2/docs/
+
+# Copyright
+copyright: Copyright &copy; 2025 Microsoft Corporation
+
+theme:
+  name: material
+  language: en
+  palette:
+    # Light mode
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  font:
+    text: Roboto
+    code: Roboto Mono
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+  icon:
+    repo: fontawesome/brands/github
+
+# Extensions
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+
+# Navigation
+nav:
+  - Home: index.md
+  - Architecture: architecture.md
+  - Lab:
+    - "Expose REST API as MCP": labs/expose-rest-api-as-mcp.md
+  - Prerequisites: prerequisites.md
+  - Getting Started: getting-started.md
+  - Resources:
+    - References: resources/references.md
+
+# Plugins
+plugins:
+  - search
+
+# Extra
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/odaibert/api-modernization-with-mcp
+    - icon: fontawesome/brands/microsoft
+      link: https://azure.microsoft.com
+
+extra_css:
+  - stylesheets/extra.css
