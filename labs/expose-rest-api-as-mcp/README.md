@@ -28,33 +28,33 @@ This lab walks you through modernizing a traditional REST API — a **Product Ca
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                          Azure Resource Group                          │
-│                                                                        │
-│  ┌──────────────┐    ┌────────────────────┐    ┌────────────────────┐  │
-│  │  AI Foundry   │    │   Azure API Mgmt   │    │  Container App     │  │
-│  │  (GPT-4o-mini)│    │   (v2 / BasicV2)   │    │  Product Catalog   │  │
-│  │               │◄───┤                    │───►│  MCP Server        │  │
-│  │  Inference    │    │  • MCP API (native) │    │  (FastMCP +        │  │
-│  │  API          │    │  • Inference API    │    │   Starlette)       │  │
-│  └──────────────┘    │  • Subscriptions    │    └────────────────────┘  │
-│                       │  • Policies         │                           │
-│                       └────────────────────┘                           │
-│                              ▲                                         │
-│  ┌──────────────┐           │            ┌────────────────────┐       │
-│  │ Log Analytics │           │            │ Container Registry │       │
-│  │ + App Insights│           │            │ (ACR)              │       │
-│  └──────────────┘           │            └────────────────────┘       │
-│                              │                                         │
-└──────────────────────────────┼─────────────────────────────────────────┘
-                               │
-               ┌───────────────┼───────────────┐
-               │               │               │
-        ┌──────┴──────┐ ┌─────┴─────┐ ┌──────┴──────┐
-        │  Agent       │ │  VS Code   │ │  MCP        │
-        │  Framework   │ │  Copilot   │ │  Inspector  │
-        │  (Python)    │ │  Agent Mode│ │  (Browser)  │
-        └─────────────┘ └───────────┘ └─────────────┘
++-------------------------------------------------------------------------+
+|                          Azure Resource Group                           |
+|                                                                         |
+|  +----------------+    +--------------------+    +------------------+   |
+|  | AI Foundry     |    |  Azure API Mgmt    |    | Container App    |   |
+|  | (GPT-4o-mini)  |    |  (v2 / BasicV2)    |    | Product Catalog  |   |
+|  |                |<---|                    |--->| MCP Server       |   |
+|  | Inference      |    | * MCP API (native) |    | (FastMCP +       |   |
+|  | API            |    | * Inference API    |    |  Starlette)      |   |
+|  +----------------+    | * Subscriptions    |    +------------------+   |
+|                        | * Policies         |                           |
+|                        +--------------------+                           |
+|                                  |                                      |
+|  +----------------+              |          +--------------------+      |
+|  | Log Analytics  |              |          | Container Registry |      |
+|  | + App Insights |              |          | (ACR)              |      |
+|  +----------------+              |          +--------------------+      |
+|                                  |                                      |
++----------------------------------+--------------------------------------+
+                                   |
+                    +--------------+---------------+
+                    |              |               |
+             +-----+------+ +----+-------+ +-----+------+
+             | Agent      | | VS Code    | | MCP        |
+             | Framework  | | Copilot    | | Inspector  |
+             | (Python)   | | Agent Mode | | (Browser)  |
+             +------------+ +------------+ +------------+
 ```
 
 **Data flow:** MCP clients (Agent Framework, VS Code, Inspector) connect to APIM via Streamable HTTP → APIM authenticates, applies policies, and routes to the backend Container App → the MCP server exposes REST API capabilities as discoverable tools.

@@ -26,20 +26,20 @@ The **Model Context Protocol** is an open standard that turns APIs into **tools*
 
 ```
 api-modernization-with-mcp/
-├── labs/
-│   └── expose-rest-api-as-mcp/      # Lab notebook, Bicep templates, and README
-│       ├── expose-rest-api-as-mcp.ipynb
-│       ├── main.bicep
-│       └── README.md
-├── modules/                          # Reusable Bicep modules
-│   ├── apim/
-│   ├── apim-streamable-mcp/
-│   └── cognitive-services/
-├── shared/                           # Shared code (MCP servers, utilities)
-│   ├── mcp-servers/
-│   │   └── product-catalog/
-│   └── utils.py
-└── requirements.txt
++-- labs/
+|   +-- expose-rest-api-as-mcp/      # Lab notebook, Bicep templates, and README
+|       +-- expose-rest-api-as-mcp.ipynb
+|       +-- main.bicep
+|       +-- README.md
++-- modules/                          # Reusable Bicep modules
+|   +-- apim/
+|   +-- apim-streamable-mcp/
+|   +-- cognitive-services/
++-- shared/                           # Shared code (MCP servers, utilities)
+|   +-- mcp-servers/
+|   |   +-- product-catalog/
+|   +-- utils.py
++-- requirements.txt
 ```
 
 ## Prerequisites
