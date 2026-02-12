@@ -5,7 +5,7 @@
 In this hands-on lab, you'll modernize a traditional **Product Catalog REST API** into an MCP-compliant server that AI agents can discover and invoke — all governed through Azure API Management.
 
 !!! abstract "What You'll Build"
-    A complete end-to-end pipeline: **REST API → MCP Server → Container App → APIM Gateway → AI Agent**
+    A complete end-to-end pipeline: **AI Agent → APIM Gateway → Container App (MCP Server wrapping REST API)**
 
 ---
 

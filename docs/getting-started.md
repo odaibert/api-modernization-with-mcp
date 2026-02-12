@@ -53,23 +53,23 @@ You have two options:
 
 ```
 api-modernization-with-mcp/
-├── labs/
-│   └── expose-rest-api-as-mcp/       # Lab notebook, Bicep templates, and README
-│       ├── expose-rest-api-as-mcp.ipynb
-│       ├── main.bicep
-│       └── policy.xml
-├── modules/                           # Reusable Bicep modules
-│   ├── apim/v2/                       # APIM v2 + Inference API
-│   ├── apim-streamable-mcp/           # MCP API module
-│   ├── cognitive-services/v3/         # AI Foundry
-│   ├── monitor/v1/                    # Application Insights
-│   └── operational-insights/v1/       # Log Analytics
-├── shared/                            # Shared code
-│   ├── mcp-servers/product-catalog/   # MCP server source + Dockerfile
-│   └── utils.py                       # Notebook utilities
-├── docs/                              # This documentation site
-├── mkdocs.yml                         # MkDocs configuration
-└── requirements.txt                   # Python dependencies
++-- labs/
+|   +-- expose-rest-api-as-mcp/       # Lab notebook, Bicep templates, and README
+|       +-- expose-rest-api-as-mcp.ipynb
+|       +-- main.bicep
+|       +-- policy.xml
++-- modules/                           # Reusable Bicep modules
+|   +-- apim/v2/                       # APIM v2 + Inference API
+|   +-- apim-streamable-mcp/           # MCP API module
+|   +-- cognitive-services/v3/         # AI Foundry
+|   +-- monitor/v1/                    # Application Insights
+|   +-- operational-insights/v1/       # Log Analytics
++-- shared/                            # Shared code
+|   +-- mcp-servers/product-catalog/   # MCP server source + Dockerfile
+|   +-- utils.py                       # Notebook utilities
++-- docs/                              # This documentation site
++-- mkdocs.yml                         # MkDocs configuration
++-- requirements.txt                   # Python dependencies
 ```
 
 ---

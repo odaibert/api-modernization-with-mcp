@@ -12,43 +12,43 @@ This solution **modernizes an existing REST API** — a Product Catalog service 
 ## Solution Architecture
 
 ```
-                        ┌─────────────────────────────────────────────┐
-                        │           MCP Clients                       │
-                        │                                             │
-                        │  ┌─────────────┐  ┌──────────┐  ┌────────┐ │
-                        │  │ Agent       │  │ VS Code  │  │ MCP    │ │
-                        │  │ Framework   │  │ Copilot  │  │Inspect.│ │
-                        │  └──────┬──────┘  └────┬─────┘  └───┬────┘ │
-                        └─────────┼──────────────┼────────────┼───────┘
-                                  │              │            │
+                        +---------------------------------------------+
+                        |           MCP Clients                       |
+                        |                                             |
+                        |  +-------------+  +----------+  +--------+ |
+                        |  | Agent       |  | VS Code  |  | MCP    | |
+                        |  | Framework   |  | Copilot  |  |Inspect.| |
+                        |  +------+------+  +----+-----+  +---+----+ |
+                        +---------+--------------+------------+-------+
+                                  |              |            |
                           Streamable HTTP + api-key header
-                                  │              │            │
-┌─────────────────────────────────┼──────────────┼────────────┼─────────────────────┐
-│ Azure Resource Group            │              │            │                      │
-│                                 ▼              ▼            ▼                      │
-│  ┌─────────────────────────────────────────────────────────────────────────────┐  │
-│  │                Azure API Management (BasicV2 SKU)                           │  │
-│  │                                                                             │  │
-│  │  ┌───────────────────────────┐    ┌───────────────────────────────┐         │  │
-│  │  │ Product Catalog MCP API   │    │ Azure OpenAI Inference API    │         │  │
-│  │  │ • Type: mcp (native)      │    │ • Type: REST (OpenAPI import) │         │  │
-│  │  │ • Transport: streamable   │    │ • Auth: Managed Identity      │         │  │
-│  │  │ • Path: /product-catalog  │    │ • Path: /inference            │         │  │
-│  │  └─────────────┬─────────────┘    └──────────────┬────────────────┘         │  │
-│  └────────────────┼─────────────────────────────────┼──────────────────────────┘  │
-│                   │                                  │                             │
-│                   ▼                                  ▼                             │
-│  ┌──────────────────────────────┐  ┌──────────────────────────────────┐          │
-│  │  Azure Container App         │  │  Azure AI Foundry                │          │
-│  │  • FastMCP + Starlette       │  │  • GPT-4o-mini deployment        │          │
-│  │  • Streamable HTTP at /mcp   │  │  • Chat completions + tool-use   │          │
-│  │  • 5 tools (catalog ops)     │  │  • Foundry project               │          │
-│  └──────────────────────────────┘  └──────────────────────────────────┘          │
-│                                                                                   │
-│  ┌─────────────────────────────────────────────────────────────────────────────┐  │
-│  │  Observability: Log Analytics + Application Insights                        │  │
-│  └─────────────────────────────────────────────────────────────────────────────┘  │
-└───────────────────────────────────────────────────────────────────────────────────┘
+                                  |              |            |
++---------------------------------+--------------+------------+---------------------+
+| Azure Resource Group            |              |            |                      |
+|                                 v              v            v                      |
+|  +-----------------------------------------------------------------------------+  |
+|  |                Azure API Management (BasicV2 SKU)                           |  |
+|  |                                                                             |  |
+|  |  +---------------------------+    +-------------------------------+         |  |
+|  |  | Product Catalog MCP API   |    | Azure OpenAI Inference API    |         |  |
+|  |  | • Type: mcp (native)      |    | • Type: REST (OpenAPI import) |         |  |
+|  |  | • Transport: streamable   |    | • Auth: Managed Identity      |         |  |
+|  |  | • Path: /product-catalog  |    | • Path: /openai               |         |  |
+|  |  +-------------+-------------+    +--------------+----------------+         |  |
+|  +----------------+---------------------------------+--------------------------+  |
+|                   |                                  |                             |
+|                   v                                  v                             |
+|  +------------------------------+  +----------------------------------+          |
+|  |  Azure Container App         |  |  Azure AI Foundry                |          |
+|  |  • FastMCP + Starlette       |  |  • GPT-4o-mini deployment        |          |
+|  |  • Streamable HTTP at /mcp   |  |  • Chat completions + tool-use   |          |
+|  |  • 5 tools (catalog ops)     |  |  • Foundry project               |          |
+|  +------------------------------+  +----------------------------------+          |
+|                                                                                   |
+|  +-----------------------------------------------------------------------------+  |
+|  |  Observability: Log Analytics + Application Insights                        |  |
+|  +-----------------------------------------------------------------------------+  |
++-----------------------------------------------------------------------------------+
 ```
 
 ---
@@ -59,58 +59,58 @@ This solution **modernizes an existing REST API** — a Product Catalog service 
 
 ```
 MCP Client                    APIM                         Container App
-    │                          │                                │
-    │ ── POST /product-catalog ──►                              │
-    │    Header: api-key=<key> │                                │
-    │    Body: {"method":      │                                │
-    │     "initialize"}        │                                │
-    │                          │── Validate subscription key ──►│
-    │                          │── Route to MCP backend ───────►│
-    │                          │                                │── Initialize MCP session
-    │                          │◄── Session ID + capabilities ──│
-    │◄─── 200 OK ─────────────│                                │
-    │                          │                                │
-    │ ── POST /product-catalog ──►                              │
-    │    Body: {"method":      │                                │
-    │     "tools/list"}        │                                │
-    │                          │── Forward to backend ─────────►│
-    │                          │                                │── Return 5 tools
-    │                          │◄── Tool schemas ───────────────│
-    │◄─── 200 OK ─────────────│                                │
-    │                          │                                │
-    │ ── POST /product-catalog ──►                              │
-    │    Body: {"method":      │                                │
-    │     "tools/call",        │                                │
-    │     "params": {          │                                │
-    │       "name":            │                                │
-    │       "search_products", │── Forward to backend ─────────►│
-    │       "arguments":       │                                │── Execute tool logic
-    │       {"query":"USB"}}}  │                                │── Return results
-    │                          │◄── Tool results ───────────────│
-    │◄─── 200 OK ─────────────│                                │
+    |                          |                                |
+    | -- POST /product-catalog -->                              |
+    |    Body: {"method":      |                                |
+    |     "initialize"}        |                                |
+    |                          |-- Route to MCP backend ------->|
+    |                          |                                |-- Initialize MCP session
+    |                          |<-- Session ID + capabilities --|
+    |<--- 200 OK -------------|                                |
+    |                          |                                |
+    | -- POST /product-catalog -->                              |
+    |    Body: {"method":      |                                |
+    |     "tools/list"}        |                                |
+    |                          |-- Forward to backend --------->|
+    |                          |                                |-- Return 5 tools
+    |                          |<-- Tool schemas ---------------|
+    |<--- 200 OK -------------|                                |
+    |                          |                                |
+    | -- POST /product-catalog -->                              |
+    |    Body: {"method":      |                                |
+    |     "tools/call",        |                                |
+    |     "params": {          |                                |
+    |       "name":            |                                |
+    |       "search_products", |-- Forward to backend --------->|
+    |       "arguments":       |                                |-- Execute tool logic
+    |       {"query":"USB"}}}  |                                |-- Return results
+    |                          |<-- Tool results ---------------|
+    |<--- 200 OK -------------|                                |
 ```
+
+> **Note:** The MCP API has `subscriptionRequired: false` — the `api-key` header is accepted but not enforced. For production, enable subscription requirements or add OAuth 2.0 / JWT validation.
 
 ### AI Agent Orchestration (Agent Framework)
 
 ```
 User               Agent Framework         APIM              Container App    AI Foundry
-  │                     │                   │                      │              │
-  │── "Find USB" ──────►│                   │                      │              │
-  │                     │── Chat completion ►│                      │              │
-  │                     │   (with tool defs) │── Managed ID auth ──►│              │
-  │                     │                   │                      │              │
-  │                     │◄─ tool_call ──────│◄─ GPT-4o-mini ───────│              │
-  │                     │   search_products │                      │              │
-  │                     │                   │                      │              │
-  │                     │── MCP tools/call ►│                      │              │
-  │                     │   api-key header  │── Forward ──────────►│              │
-  │                     │                   │                      │── Execute     │
-  │                     │◄─ Tool results ───│◄── Results ──────────│              │
-  │                     │                   │                      │              │
-  │                     │── Chat completion ►│                      │              │
-  │                     │   (with results)  │── Managed ID auth ──►│              │
-  │                     │◄─ Final answer ───│◄── Summary ──────────│              │
-  │◄── "Found USB-C…" ─│                   │                      │              │
+  |                     |                   |                      |              |
+  |-- "Find USB" ------>|                   |                      |              |
+  |                     |-- Chat completion >|                      |              |
+  |                     |   (with tool defs) |-- Managed ID auth -->|              |
+  |                     |                   |                      |              |
+  |                     |<- tool_call ------|<- GPT-4o-mini -------|              |
+  |                     |   search_products |                      |              |
+  |                     |                   |                      |              |
+  |                     |-- MCP tools/call >|                      |              |
+  |                     |   api-key header  |-- Forward ---------->|              |
+  |                     |                   |                      |-- Execute     |
+  |                     |<- Tool results ---|<-- Results ----------|              |
+  |                     |                   |                      |              |
+  |                     |-- Chat completion >|                      |              |
+  |                     |   (with results)  |-- Managed ID auth -->|              |
+  |                     |<- Final answer ---|<-- Summary ----------|              |
+  |<-- "Found USB-C…" -|                   |                      |              |
 ```
 
 ---
@@ -162,11 +162,11 @@ resource apimService 'Microsoft.ApiManagement/service@2024-06-01-preview' = {
 **What runs inside:**
 ```
 Python 3.13 slim → Uvicorn → Starlette ASGI app → FastMCP
-                                  │
+                                  |
                     Mount("/product-catalog", app=mcp_asgi)
-                                  │
+                                  |
                          MCP endpoint at /product-catalog/mcp
-                                  │
+                                  |
                     5 tools: get_categories, get_products_by_category,
                              get_product, search_products, check_stock
 ```
@@ -198,7 +198,7 @@ Python 3.13 slim → Uvicorn → Starlette ASGI app → FastMCP
 
 **RBAC chain:**
 ```
-APIM (System Assigned MI) ── Cognitive Services OpenAI Contributor ──► AI Foundry account
+APIM (System Assigned MI) -- Cognitive Services OpenAI Contributor --> AI Foundry account
 ```
 
 ---
@@ -208,9 +208,9 @@ APIM (System Assigned MI) ── Cognitive Services OpenAI Contributor ──►
 **Role:** Central observability layer — unified log collection, APM, and custom metrics.
 
 ```
-APIM diagnostic settings ──────► Log Analytics Workspace
-Container App Environment ──────►    (30-day retention)
-Application Insights ──────────►
+APIM diagnostic settings ------> Log Analytics Workspace
+Container App Environment ------>    (30-day retention)
+Application Insights ---------->
 ```
 
 | Capability | Details |
@@ -225,34 +225,34 @@ Application Insights ──────────►
 ## Security Architecture
 
 ```
-┌──────────────────────────────────────────────────────────────────┐
-│                      Security Layers                              │
-│                                                                   │
-│  Layer 1: APIM Gateway Authentication                             │
-│  ┌────────────────────────────────────────────────────────────┐   │
-│  │ • api-key subscription header (all APIs)                   │   │
-│  │ • Can add: OAuth 2.0, JWT validation, Microsoft Entra ID   │   │
-│  │ • Rate limiting and IP filtering via policies              │   │
-│  └────────────────────────────────────────────────────────────┘   │
-│                                                                   │
-│  Layer 2: APIM → Backend Authentication                           │
-│  ┌────────────────────────────────────────────────────────────┐   │
-│  │ MCP API:       APIM → Container App (TLS, no extra auth)  │   │
-│  │ Inference API: APIM → AI Foundry (Managed Identity)        │   │
-│  └────────────────────────────────────────────────────────────┘   │
-│                                                                   │
-│  Layer 3: Resource-Level RBAC                                     │
-│  ┌────────────────────────────────────────────────────────────┐   │
-│  │ APIM MI → Cognitive Services OpenAI Contributor            │   │
-│  │ Container App UAI → AcrPull → ACR                          │   │
-│  └────────────────────────────────────────────────────────────┘   │
-│                                                                   │
-│  Layer 4: Network & Transport                                     │
-│  ┌────────────────────────────────────────────────────────────┐   │
-│  │ • HTTPS everywhere (TLS at Container Apps ingress)         │   │
-│  │ • Production: VNet integration, private endpoints, WAF     │   │
-│  └────────────────────────────────────────────────────────────┘   │
-└──────────────────────────────────────────────────────────────────┘
++------------------------------------------------------------------+
+|                      Security Layers                              |
+|                                                                   |
+|  Layer 1: APIM Gateway Authentication                             |
+|  +------------------------------------------------------------+   |
+|  | • api-key subscription header (all APIs)                   |   |
+|  | • Can add: OAuth 2.0, JWT validation, Microsoft Entra ID   |   |
+|  | • Rate limiting and IP filtering via policies              |   |
+|  +------------------------------------------------------------+   |
+|                                                                   |
+|  Layer 2: APIM → Backend Authentication                           |
+|  +------------------------------------------------------------+   |
+|  | MCP API:       APIM → Container App (TLS, no extra auth)  |   |
+|  | Inference API: APIM → AI Foundry (Managed Identity)        |   |
+|  +------------------------------------------------------------+   |
+|                                                                   |
+|  Layer 3: Resource-Level RBAC                                     |
+|  +------------------------------------------------------------+   |
+|  | APIM MI → Cognitive Services OpenAI Contributor            |   |
+|  | Container App UAI → AcrPull → ACR                          |   |
+|  +------------------------------------------------------------+   |
+|                                                                   |
+|  Layer 4: Network & Transport                                     |
+|  +------------------------------------------------------------+   |
+|  | • HTTPS everywhere (TLS at Container Apps ingress)         |   |
+|  | • Production: VNet integration, private endpoints, WAF     |   |
+|  +------------------------------------------------------------+   |
++------------------------------------------------------------------+
 ```
 
 ---
@@ -290,7 +290,7 @@ resource mcp 'Microsoft.ApiManagement/service/apis@2024-06-01-preview' = {
 ```bicep
 resource inferenceAPI 'Microsoft.ApiManagement/service/apis@2024-06-01-preview' = {
   properties: {
-    path: 'inference'
+    path: 'openai'           // Defaults to 'openai' when inferenceAPIPath is empty
     format: 'openapi-link'   // Imports the official Azure OpenAI spec
     subscriptionRequired: true
     subscriptionKeyParameterNames: { header: 'api-key' }
@@ -308,14 +308,14 @@ The Bicep template orchestrates deployment with implicit dependency resolution:
 
 ```
 1. Log Analytics Workspace
-   └──► 2. Application Insights
-        └──► 3. API Management
-             ├──► 4. AI Foundry + Model Deployments (RBAC)
-             │    └──► 5. Inference API
-             ├──► 6. Container Registry
-             │    └──► 7. Container App Environment + Container App
-             │         └──► 10. MCP API module
-             └──► (Inference API deploys before MCP API — explicit dependsOn)
+   +--> 2. Application Insights
+        +--> 3. API Management
+             +--> 4. AI Foundry + Model Deployments (RBAC)
+             |    +--> 5. Inference API
+             +--> 6. Container Registry
+             |    +--> 7. Container App Environment + Container App
+             |         +--> 10. MCP API module
+             +--> (Inference API deploys before MCP API — explicit dependsOn)
 ```
 
 !!! note "Resource Naming"
